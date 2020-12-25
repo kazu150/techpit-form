@@ -2,34 +2,54 @@ import React from 'react';
 import { TextField, Grid, InputLabel, Typography, Button } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../domain/entity/rootState';
-import {Carrer as ICarrer} from '../domain/entity/carrer';
+import {Career as ICareer} from '../domain/entity/career';
 import profileActions from '../store/profile/actions';
 import { PROFILE } from '../domain/services/profile';
-import { exitEmptyCarrers } from '../domain/services/carrer';
+import { exitEmptyCareers } from '../domain/services/career';
+import { calculateValidation } from '../domain/services/validation';
+import validationActions from '../store/validation/actions';
 
 import useStyles from './styles';
 
-const Carrer = () => {
+const Career = () => {
     const classes = useStyles();
 
     const dispatch = useDispatch();
-    const carrers = useSelector((state: RootState) => state.profile.carrers);
-    const isAbleToAddCarrer = exitEmptyCarrers(carrers);
+    const careers = useSelector((state: RootState) => state.profile.careers);
+    const profile = useSelector((state: RootState) => state.profile);
+    const validation = useSelector((state: RootState) => state.validation)
 
-    const handleChange = (member: Partial<ICarrer>, i: number) => {
-        dispatch(profileActions.setCarrer({ carrer: member, index: i }));
+    const isAbleToAddCareer = exitEmptyCareers(careers);
+
+    const handleChange = (member: Partial<ICareer>, i: number) => {
+        dispatch(profileActions.setCareer({ career: member, index: i }));
+        recalculateValidation(member, i);
     }
-    const handleAddCarrer = () => {
-        dispatch(profileActions.addCarrer({}));
+
+    const handleAddCareer = () => {
+        dispatch(profileActions.addCareer({}));
     };
-    const handleDeleteCarrer = (i: number) => {
-        dispatch(profileActions.deleteCarrer(i))
+
+    const handleDeleteCareer = (i: number) => {
+        dispatch(profileActions.deleteCareer(i))
+    };
+
+    const recalculateValidation = (member: Partial<ICareer>, i: number) => {
+        if(!validation.isStartValidation) return;
+        const newProfile = {
+            ...profile,
+            career: profile.careers.map((c, _i) => 
+                _i === i ? {...c, ...member} : c
+            )
+        }
+        const message = calculateValidation(newProfile);
+        dispatch(validationActions.setValidation(message));
     }
 
 
     return(
         <React.Fragment>
-            {carrers.map((c, i) => (
+            {careers.map((c, i) => (
                 <React.Fragment key={i}>
                     <Typography variant="h5" component="h3" className={classes.title}>
                         職歴 {i + 1}
@@ -37,19 +57,23 @@ const Carrer = () => {
                     <TextField
                         className={classes.formField}
                         fullWidth
-                        label={PROFILE.CARRERS.COMPANY}
+                        error={!!validation.message.careers[i]?.company}
+                        helperText={validation.message.careers[i]?.company}
+                        label={PROFILE.CAREERS.COMPANY}
                         value={c.company}
                         onChange={e => handleChange({company: e.target.value}, i)}
                     />
                     <TextField
                         className={classes.formField}
                         fullWidth
-                        label={PROFILE.CARRERS.POSITION}
+                        error={!!validation.message.careers[i]?.position}
+                        helperText={validation.message.careers[i]?.position}
+                        label={PROFILE.CAREERS.POSITION}
                         value={c.position}
                         onChange={e => handleChange({position: e.target.value}, i)}
                     />
                     <div className={classes.careerSpan}>
-                        <InputLabel shrink>{PROFILE.CARRERS.SPAN}</InputLabel>
+                        <InputLabel shrink>{PROFILE.CAREERS.SPAN}</InputLabel>
                         <Grid
                             container
                             spacing={1}
@@ -59,6 +83,8 @@ const Carrer = () => {
                                 <TextField
                                     fullWidth
                                     type='month'
+                                    error={!!validation.message.careers[i]?.startAt}
+                                    helperText={validation.message.careers[i]?.startAt}
                                     InputLabelProps={{
                                         shrink: true
                                     }}
@@ -73,6 +99,8 @@ const Carrer = () => {
                                 <TextField
                                     fullWidth
                                     type='month'
+                                    error={!!validation.message.careers[i]?.endAt}
+                                    helperText={validation.message.careers[i]?.endAt}
                                     InputLabelProps={{
                                         shrink: true
                                     }}
@@ -84,7 +112,7 @@ const Carrer = () => {
                     </div>
                     <Button
                         className={classes.button}
-                        onClick={() => handleDeleteCarrer(i)}
+                        onClick={() => handleDeleteCareer(i)}
                         fullWidth
                         variant="outlined"
                         color="secondary"
@@ -95,10 +123,10 @@ const Carrer = () => {
             ))}
             <Button
                 className={classes.button}
-                onClick={handleAddCarrer}
+                onClick={handleAddCareer}
                 fullWidth
                 variant='outlined'
-                disabled={isAbleToAddCarrer}
+                disabled={isAbleToAddCareer}
             >
                 職歴を追加
             </Button>
@@ -106,4 +134,4 @@ const Carrer = () => {
     );
 }
 
-export default Carrer;
+export default Career;

@@ -1,7 +1,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { Profile } from '../../domain/entity/profile';
 import profileActions from './actions';
-import { Carrer } from '../../domain/entity/carrer';
+import { Career } from '../../domain/entity/career';
 
 const init: Profile = {
     name: "",
@@ -14,7 +14,7 @@ const init: Profile = {
         city: "",
         restAddress: ""
     },
-    carrers: [],
+    careers: [],
     college: {
         name: "",
         faculty: "",
@@ -22,7 +22,7 @@ const init: Profile = {
     }
 };
 
-const initCarrer: Carrer = {
+const initCareer: Career = {
     company: '',
     position: '',
     startAt: '',
@@ -45,24 +45,24 @@ const profileReducer = reducerWithInitialState(init)
             ...state,
             address: { ...state.address, ...payload.result }
         })
-    ).case(profileActions.setCarrer,
+    ).case(profileActions.setCareer,
         (state, payload) => ({
             ...state,
-            carrers: state.carrers.map((c, i) =>
-                i === payload.index ? { ...c, ...payload.carrer } : c
+            careers: state.careers.map((c, i) =>
+                i === payload.index ? { ...c, ...payload.career } : c
             )
         })
-    ).case(profileActions.deleteCarrer, 
+    ).case(profileActions.deleteCareer, 
         (state, payload) => ({
         ...state,
-            carrers: state.carrers.filter((_, i) => 
+            careers: state.careers.filter((_, i) => 
                 i !== payload
             )
         })
-    ).case(profileActions.addCarrer,
+    ).case(profileActions.addCareer,
         state => ({
             ...state,
-            carrers: [...state.carrers, initCarrer]
+            careers: [...state.careers, initCareer]
         })
     ).case(profileActions.setCollege,
         (state, payload) => ({

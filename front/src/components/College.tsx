@@ -7,7 +7,8 @@ import {
     FormControl, 
     InputLabel, 
     Select, 
-    MenuItem 
+    MenuItem,
+    FormHelperText
 } from '@material-ui/core';
 
 import { RootState } from '../domain/entity/rootState';
@@ -16,6 +17,8 @@ import { searchColleges } from '../store/colleges/effects';
 import { College as ICollege } from '../domain/entity/college';
 import profileActions from '../store/profile/actions';
 import { PROFILE } from '../domain/services/profile';
+import { calculateValidation } from '../domain/services/validation';
+import validationActions from '../store/validation/actions'
 
 import useStyles from './styles';
 
@@ -23,6 +26,7 @@ const College = () => {
     const dispatch = useDispatch();
     const colleges = useSelector((state: RootState) => state.colleges);
     const profile = useSelector((state: RootState) => state.profile);
+    const validation = useSelector((state: RootState) => state.validation);
     const classes = useStyles();
 
     const currentCollege = colleges.result.filter(
@@ -43,12 +47,23 @@ const College = () => {
 
     const handleCollegeChange = (member: Partial<ICollege>) => {
         dispatch(profileActions.setCollege(member));
+        recalculateValidation(member);
     };
 
     const handleReset = () => {
         handleCollegeChange({name: "", faculty: "", department: ""});
         dispatch(collegesActions.setSearchWord(""));
         dispatch(collegesActions.searchCollege.done({ result: [], params: {} }));
+    }
+
+    const recalculateValidation = (member: Partial<ICollege>) => {
+        if(!validation.isStartValidation) return;
+        const newProfile = {
+            ...profile,
+            college: { ...profile.college, ...member }
+        }
+        const message= calculateValidation(newProfile);
+        dispatch(validationActions.setValidation(message));
     }
 
     return(
@@ -97,7 +112,11 @@ const College = () => {
                         value={profile.college.name}
                         disabled
                     />
-                    <FormControl fullWidth className={classes.formField}>
+                    <FormControl 
+                        error={!!validation.message.college.faculty}
+                        fullWidth 
+                        className={classes.formField}
+                    >
                         <InputLabel>{PROFILE.COLLEGE.FACULTY}</InputLabel>
                         <Select
                             value={profile.college.faculty}

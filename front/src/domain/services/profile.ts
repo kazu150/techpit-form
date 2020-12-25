@@ -14,9 +14,11 @@ export const PROFILE = {
         FACULTY: "学部",
         DEPARTMENT: "学科"
     },
-    CARRERS: {
+    CAREERS: {
         COMPANY: "会社名",
         POSITION: "役職",
-        SPAN: "期間"
+        SPAN: "期間",
+        START_AT: "開始月",
+        END_AT: "終了月"
     }
 };

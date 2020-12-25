@@ -1,4 +1,4 @@
-export type Carrer = {
+export type Career = {
     company: string;
     position: string;
     startAt: string;
